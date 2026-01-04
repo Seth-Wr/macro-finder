@@ -77,6 +77,7 @@ def search(words):
 def Proccess_Input(text):
     try:
          re_pattern = r'\b[a-z0-9]{2,}\b'
+         text = text.strip().lower()
          words = re.findall(re_pattern,text)
          return search(words)
             
