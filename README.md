@@ -67,6 +67,7 @@ nano deploy_nginx.sh
 # Execute deployment
 sudo chmod +x deploy_nginx.sh
 ./deploy_nginx.sh
+
 🛠️ Tech Stack
 Backend: Python, FastAPI, Uvicorn
 
