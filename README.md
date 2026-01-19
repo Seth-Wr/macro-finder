@@ -1,69 +1,79 @@
-# 🥦 Food Macros Search Engine
+🥦 Food Macros Search Engine (Cloud-Deployed API)
+A high-performance, production-ready search API that provides instant macronutrient data using custom-built algorithmic search structures. Originally a CLI tool, this system has been re-engineered as a FastAPI service deployed on AWS EC2 with a focus on high availability, security, and scalability.
 
-A fast, Python-based **CLI search engine** that lets users type food names and instantly retrieve **macronutrient information** from a pre-processed USDA Foundation Foods dataset.
+🌍 Live Demo: https://yourdomain.com/docs (Swagger UI)
 
-Search suggestions are generated using a **trie (prefix tree)**, and results are efficiently linked to nutrient data using an **inverted index** — all running inside a Python terminal environment.
+🚀 Key Evolutions
+From CLI to API: Migrated a local Python script into a robust FastAPI backend.
 
----
+High Availability: Implemented a Load Balancing strategy using Nginx to distribute traffic across multiple worker instances (Ports 8000 & 8001).
 
-## 🚀 Features
+Production Security: Fully secured with SSL (Certbot/Let's Encrypt) and Nginx Rate Limiting to prevent API abuse.
 
-- 🔍 **Autocomplete food search** using a trie (prefix tree) for real-time suggestions.
-- 📌 **Inverted index lookup** to map words → food IDs → macro values.
-- 📘 Outputs **macronutrient data** (e.g., calories, protein, carbs, fats) from USDA macros CSV.
-- 🧠 Designed for speed and simplicity inside a terminal.
-- 🧪 Includes a data preprocessing Jupyter Notebook demonstrating how to generate the search engine CSVs from raw USDA data.
-- 📦 Pre-processed CSVs (`raw_foods_words.csv`, `food_dictionary.csv`, and `food_macros.csv`) included so you can run the engine immediately.
+Performance: Uses a Trie (Prefix Tree) for O(L) search suggestions and an Inverted Index for instant nutrient lookups, bypassing the need for heavy database queries.
 
----
+🏗️ Architecture & Infrastructure
+Reverse Proxy & Load Balancer: Nginx handles SSL termination and uses a least_conn algorithm to balance requests between backend workers.
 
-## 🧠 Motivation
+Process Management: Systemd manages independent API workers, ensuring they auto-restart on failure.
 
-Finding **accurate nutrition data** quickly can be tedious. Instead of browsing large CSVs or slow search scripts, this project delivers fast responses with algorithmic search structures like tries and inverted indexes — techniques used in real-world search engines. This project showcases:
+Rate Limiting: Configured at the Nginx level (10r/s) with a burst buffer to protect system resources.
 
-✔️ Efficient data structures (Trie, inverted index)  
-✔️ Practical CSV preprocessing & linking  
-✔️ Python scripting and Jupyter data workflows  
+Deployment: Automated via shell scripts for consistent environment builds (virtual environments, dependency injection, and service configuration).
 
----
+🧠 Algorithmic Core
+The engine avoids slow linear scans of the USDA dataset by using optimized data structures:
 
-## ⚙️ How It Works
+Trie (Prefix Tree): Powers the autocomplete. It maps prefixes to complete food names in time proportional to the word length (L), not the dataset size (N).
 
-1. **Trie autocompletion**  
-   The search engine uses a trie built from all words in the food dataset so that as you type, it suggests valid completions.
+Inverted Index: Maps specific search tokens to unique Food IDs.
 
-2. **Matching food terms**  
-   Matches are linked via an **inverted index** (`food_dictionary.csv`), mapping search tokens to food IDs.
+Macro Mapping: Instantly retrieves Protein, Carbs, Fats, and Calories from the pre-processed food_macros.csv using the indexed IDs.
 
-3. **Results retrieval**  
-   Using those IDs, macro data is pulled from `food_macros.csv` and displayed to the user.
+📁 Repository Structure
+File	Purpose
+main.py	FastAPI application and endpoint logic
+search_engine.py	Core algorithmic logic (Trie & Indexing)
+deploy_nginx.sh	Production: Automates EC2 setup, Nginx config, and SSL
+init.sh	Local: Bootstraps the Python environment and dependencies
+start.sh	Development: Launches the Uvicorn server with hot-reload
+⚙️ Getting Started
+Local Development
 
----
+To run the API on your local machine:
 
-## 📁 Files & Structure
+Initialize Environment:
 
-| File | Purpose |
-|------|---------|
-| `search_engine.py` | Main CLI search script |
-| `raw_foods_words.csv` | Word list used to build the trie |
-| `food_dictionary.csv` | Inverted index: words → food IDs |
-| `food_macros.csv` | Nutrient data (macros) indexed by food ID |
-| `*.ipynb` | Data preprocessing notebooks |
-| `.gitignore` | Ignore configs and outputs |
+Bash
+chmod +x init.sh
+./init.sh
+Start the Server:
 
----
+Bash
+chmod +x start.sh
+./start.sh
+Access Docs: Open http://127.0.0.1:8000/docs to test the endpoints via Swagger.
 
-## 💡 Usage
+Production Deployment (EC2)
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/Seth-Wr/Food-Macros-Search-Engine.git
-   cd Food-Macros-Search-Engine
-   cd USDA_Search_Engine
-2. **Download Dependencies**
-   ```bash
-   pip install pandas
-3. **Start Engine**
-   ```bash
-   python Search_Engine.py 
+The deploy_nginx.sh script is designed for Ubuntu-based EC2 instances.
 
+Note: Before running, update the DOMAIN and EMAIL variables inside the script to match your public IP/Domain records.
+
+Bash
+# Update variables inside script
+nano deploy_nginx.sh 
+
+# Execute deployment
+sudo chmod +x deploy_nginx.sh
+./deploy_nginx.sh
+🛠️ Tech Stack
+Backend: Python, FastAPI, Uvicorn
+
+Data Science: Pandas, Jupyter (Preprocessing)
+
+Web Server: Nginx (Load Balancer, Reverse Proxy)
+
+Cloud: AWS EC2, Route 53
+
+Security: Certbot (SSL), Nginx Rate Limiting, Systemd
